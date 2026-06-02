@@ -25,18 +25,32 @@ if __name__ == "__main__":
 
     kolom_target = 'Kredit'
 
-    prior, posterior, hasil_prediksi = prediksi_naive_bayes(df, data_uji, kolom_target)
+    prior, posterior, hasil_prediksi, hasil_likelihood = prediksi_naive_bayes(df, data_uji, kolom_target)
 
     print("=== PROGRAM NAIVE BAYES ===")
-    print(f"Data Uji yang dimasukkan: {data_uji}\n")
+    print(f"\nData Uji yang dimasukkan:")
+    for key, value in data_uji.items():
+        print(f"   {key}: {value}")
+
+    print(f"\nData Kasus:\n{df.to_string(index=False, col_space=15)}\n")
 
     print("1. PROBABILITAS PRIOR:")
     for kelas, prob in prior.items():
         print(f"   P({kelas}) = {prob:.4f}")
 
-    print("\n2. PROBABILITAS POSTERIOR:")
+    print("\n2. LIKELIHOOD ATRIBUT:")
+    daftar_kelas = list(hasil_likelihood.keys())
+    daftar_atribut = list(hasil_likelihood[daftar_kelas[0]].keys())
+
+    for atribut in daftar_atribut:
+        for kelas in daftar_kelas:
+            print(f"   P({atribut} | {kelas}) = {hasil_likelihood[kelas][atribut]}")
+        print("")
+        
+
+    print("3. PROBABILITAS POSTERIOR:")
     for kelas, prob in posterior.items():
         print(f"   P({kelas} | Data Uji) \u221d {prob:.4f}")
 
-    print("\n3. KESIMPULAN:")
+    print("\n4. KESIMPULAN:")
     print(f"   Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: >>> {hasil_prediksi.upper()} <<<")
