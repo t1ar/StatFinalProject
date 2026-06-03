@@ -177,7 +177,11 @@ fig_posterior.update_traces(
 fig_posterior.update_layout(
     xaxis_title="Nilai Probabilitas Posterior",
     yaxis_title="",
-    showlegend=False # Legend disembunyikan karena label Y sudah jelas
+    showlegend=False, # Legend disembunyikan karena label Y sudah jelas
+    xaxis=dict(
+        range=[0, max(posterior.values()) * 1.30]  # Beri ruang 30% ekstra
+    ),
+    margin=dict(r=80)  # Tambah margin kanan
 )
 
 # Menampilkan di Streamlit
