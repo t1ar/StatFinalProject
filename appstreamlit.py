@@ -3,50 +3,50 @@ import sys
 import pandas as pd
 import streamlit as st
 from calculation import *
- 
+
 st.set_page_config(page_title="Prediksi Kredit - Naive Bayes", page_icon="💳", layout="centered")
- 
+
 st.title("💳 Prediksi Kelayakan Kredit")
 st.markdown("Menggunakan algoritma **Naive Bayes** untuk memprediksi apakah kredit akan disetujui atau ditolak.")
- 
+
 # Load CSV
 csv_data = 'raw_kasus5.csv'
 if not os.path.exists(csv_data):
     st.error("File CSV tidak ditemukan! Pastikan `raw_kasus5.csv` ada di folder yang sama.")
     sys.exit(1)
- 
+
 df = pd.read_csv(csv_data)
- 
+
 # Show dataset
 with st.expander("📊 Lihat Data Kasus"):
     df_display = df.copy()
     df_display.index = range(1, len(df) + 1)
     st.dataframe(df_display, use_container_width=True)
- 
+
 st.divider()
- 
+
 # Input form
 st.subheader("🔍 Masukkan Data Uji")
- 
+
 col1, col2, col3 = st.columns(3)
- 
+
 with col1:
     penghasilan = st.selectbox("Penghasilan", df['Penghasilan'].unique())
- 
+
 with col2:
     pekerjaan = st.selectbox("Pekerjaan", df['Pekerjaan'].unique())
- 
+
 with col3:
     riwayat_kredit = st.selectbox("Riwayat Kredit", df['RiwayatKredit'].unique())
- 
+
 data_uji = {
     'Penghasilan': penghasilan,
     'Pekerjaan': pekerjaan,
     'RiwayatKredit': riwayat_kredit,
 }
- 
+
 kolom_target = 'Kredit'
- 
+
 smooth = st.toggle("🧮 Gunakan Laplace Smoothing")
 
 # if st.button("🚀 Prediksi Sekarang", use_container_width=True, type="primary"):
@@ -91,4 +91,3 @@ st.table(posterior_df)
 st.markdown("**4. Kesimpulan**")
 st.info(f"Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: **{hasil_prediksi.upper()}**")
 
-    

@@ -1,2 +1,0 @@
-
-        print("Atribut: ",atribut)

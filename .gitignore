@@ -32,5 +32,11 @@ env/
 # PyCharm / JetBrains project-specific settings
 .idea/
 
+.vscode
+
+.devcontainer
+
+tempCodeRunnerFile.py
+
 # Log files
 *.log
