@@ -83,40 +83,52 @@ st.plotly_chart(fig_prior, use_container_width=True)
 # Likelihood
 st.markdown("**2. Likelihood Atribut**")
 
-# 1. Melt DataFrame
-df_melted = df.melt(
-    id_vars=['Kredit'],
-    value_vars=['Penghasilan', 'Pekerjaan', 'RiwayatKredit'],
-    var_name='Jenis_Atribut',
-    value_name='Nilai_Kategori'
-)
+# 1. Siapkan data dari dictionary hasil_likelihood ke bentuk list panjang
+likelihood_plot_data = []
+for kelas, atribut_dict in hasil_likelihood.items():
+    for atribut, nilai_prob in atribut_dict.items():
+        # Karena atribut sudah bernilai seperti "Penghasilan->Tinggi",
+        # kita cukup mempercantik tampilannya saja (misal mengganti "->" menjadi " = ")
+        # agar lebih enak dibaca di grafik.
+        nama_label = atribut.replace("->", " = ")
 
-# 2. Gabungkan nama atribut dan nilainya agar sumbu X lebih jelas
-# Hasilnya misal: "Penghasilan: Tinggi", "Pekerjaan: Tetap", dll.
-df_melted['Label_X'] = df_melted['Jenis_Atribut'] + ": " + df_melted['Nilai_Kategori']
+        likelihood_plot_data.append({
+            "Kelas": kelas,
+            "Atribut": nama_label,
+            "Probabilitas": nilai_prob
+        })
+
+# 2. Ubah menjadi Pandas DataFrame
+df_likelihood_plot = pd.DataFrame(likelihood_plot_data)
 
 # Set warna kustom
 warna_keputusan = {'Disetujui': '#2ecc71', 'Ditolak': '#e74c3c'}
 
-# 3. Buat Histogram dalam 1 Grafik Utuh (tanpa facet_col)
-fig_combined = px.histogram(
-    df_melted,
-    x="Label_X", # Gunakan label yang sudah digabung
-    color="Kredit",
-    barmode="group",
-    title="Distribusi Keseluruhan Kategori terhadap Keputusan Kredit",
-    text_auto=True,
+# 3. Buat Grouped Bar Chart
+fig_likelihood = px.bar(
+    df_likelihood_plot,
+    x="Atribut",
+    y="Probabilitas",
+    color="Kelas",
+    barmode="group", # Batang Disetujui dan Ditolak bersebelahan
+    title="P( Atribut | Kelas ) berdasarkan Data Uji",
     color_discrete_map=warna_keputusan
 )
 
-# Rapikan label sumbu X agar lebih mudah dibaca
-fig_combined.update_layout(
-    xaxis_title="Kategori Atribut",
-    yaxis_title="Jumlah Pelamar",
-    xaxis={'categoryorder':'category ascending'} # Mengurutkan secara alfabetis (opsional)
+# 4. Merapikan tampilan angka dan sumbu
+fig_likelihood.update_traces(
+    texttemplate='%{y:.4f}', # Tampilkan 4 angka di belakang koma
+    textposition='outside'
 )
 
-st.plotly_chart(fig_combined, use_container_width=True)
+fig_likelihood.update_layout(
+    xaxis_title="Atribut Data Uji",
+    yaxis_title="Nilai Probabilitas Likelihood",
+    yaxis=dict(range=[0, 1.15]) # Beri ruang di atas agar teks tidak terpotong (max probabilitas adalah 1.0)
+)
+
+# Menampilkan di Streamlit
+st.plotly_chart(fig_likelihood, use_container_width=True)
 
 # daftar_kelas = list(hasil_likelihood.keys())
 # daftar_atribut = list(hasil_likelihood[daftar_kelas[0]].keys())
@@ -174,6 +186,6 @@ st.plotly_chart(fig_posterior, use_container_width=True)
 # posterior_df["Nilai Posterior"] = posterior_df["Nilai Posterior"].map("{:.6f}".format)
 # st.table(posterior_df)
 
-st.markdown("**4. Kesimpulan**")
-st.info(f"Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: **{hasil_prediksi.upper()}**")
+# st.markdown("**4. Kesimpulan**")
+# st.info(f"Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: **{hasil_prediksi.upper()}**")
 
