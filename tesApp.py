@@ -91,4 +91,4 @@ st.table(posterior_df)
 st.markdown("**4. Kesimpulan**")
 st.info(f"Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: **{hasil_prediksi.upper()}**")
 
-    #to run -> in terminal (D:/project-directory) type: streamlit run tesApp.py 
+    
