@@ -19,7 +19,9 @@ df = pd.read_csv(csv_data)
  
 # Show dataset
 with st.expander("📊 Lihat Data Kasus"):
-    st.dataframe(df, use_container_width=True)
+    df_display = df.copy()
+    df_display.index = range(1, len(df) + 1)
+    st.dataframe(df_display, use_container_width=True)
  
 st.divider()
  
@@ -45,46 +47,48 @@ data_uji = {
  
 kolom_target = 'Kredit'
  
-if st.button("🚀 Prediksi Sekarang", use_container_width=True, type="primary"):
-    prior, posterior, hasil_prediksi, hasil_likelihood = prediksi_naive_bayes(df, data_uji, kolom_target)
- 
-    st.divider()
-    st.subheader("📋 Hasil Analisis")
- 
-    # Result banner
-    if hasil_prediksi == "Disetujui":
-        st.success(f"✅ Hasil Prediksi: **{hasil_prediksi.upper()}**")
-    else:
-        st.error(f"❌ Hasil Prediksi: **{hasil_prediksi.upper()}**")
- 
-    # Prior probabilities
-    st.markdown("**1. Probabilitas Prior**")
-    prior_df = pd.DataFrame(list(prior.items()), columns=["Kelas", "Probabilitas"])
-    prior_df["Probabilitas"] = prior_df["Probabilitas"].map("{:.4f}".format)
-    st.table(prior_df)
- 
-    # Likelihood
-    st.markdown("**2. Likelihood Atribut**")
-    daftar_kelas = list(hasil_likelihood.keys())
-    daftar_atribut = list(hasil_likelihood[daftar_kelas[0]].keys())
- 
-    likelihood_rows = []
-    for atribut in daftar_atribut:
-        row = {"Atribut": atribut}
-        for kelas in daftar_kelas:
-            row[f"P( | {kelas})"] = hasil_likelihood[kelas][atribut]
-        likelihood_rows.append(row)
- 
-    likelihood_df = pd.DataFrame(likelihood_rows)
-    st.table(likelihood_df)
- 
-    # Posterior probabilities
-    st.markdown("**3. Probabilitas Posterior**")
-    posterior_df = pd.DataFrame(list(posterior.items()), columns=["Kelas", "Nilai Posterior"])
-    posterior_df["Nilai Posterior"] = posterior_df["Nilai Posterior"].map("{:.6f}".format)
-    st.table(posterior_df)
- 
-    st.markdown("**4. Kesimpulan**")
-    st.info(f"Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: **{hasil_prediksi.upper()}**")
+smooth = st.toggle("🧮 Gunakan Laplace Smoothing")
+
+# if st.button("🚀 Prediksi Sekarang", use_container_width=True, type="primary"):
+prior, posterior, hasil_prediksi, hasil_likelihood = prediksi_naive_bayes(df, data_uji, kolom_target, smooth)
+
+st.divider()
+st.subheader("📋 Hasil Analisis")
+
+# Result banner
+if hasil_prediksi == "Disetujui":
+    st.success(f"✅ Hasil Prediksi: **{hasil_prediksi.upper()}**")
+else:
+    st.error(f"❌ Hasil Prediksi: **{hasil_prediksi.upper()}**")
+
+# Prior probabilities
+st.markdown("**1. Probabilitas Prior**")
+prior_df = pd.DataFrame(list(prior.items()), columns=["Kelas", "Probabilitas"])
+prior_df["Probabilitas"] = prior_df["Probabilitas"].map("{:.4f}".format)
+st.table(prior_df)
+
+# Likelihood
+st.markdown("**2. Likelihood Atribut**")
+daftar_kelas = list(hasil_likelihood.keys())
+daftar_atribut = list(hasil_likelihood[daftar_kelas[0]].keys())
+
+likelihood_rows = []
+for atribut in daftar_atribut:
+    row = {"Atribut": atribut}
+    for kelas in daftar_kelas:
+        row[f"P(Atribut | {kelas})"] = hasil_likelihood[kelas][atribut]
+    likelihood_rows.append(row)
+
+likelihood_df = pd.DataFrame(likelihood_rows)
+st.table(likelihood_df)
+
+# Posterior probabilities
+st.markdown("**3. Probabilitas Posterior**")
+posterior_df = pd.DataFrame(list(posterior.items()), columns=["Kelas", "Nilai Posterior"])
+posterior_df["Nilai Posterior"] = posterior_df["Nilai Posterior"].map("{:.6f}".format)
+st.table(posterior_df)
+
+st.markdown("**4. Kesimpulan**")
+st.info(f"Berdasarkan nilai posterior tertinggi, data tersebut diprediksi: **{hasil_prediksi.upper()}**")
 
     #to run -> in terminal (D:/project-directory) type: streamlit run tesApp.py 

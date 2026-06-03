@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def hitung_prior(df: pd.DataFrame, nama_kolom_target):
     """Menghitung probabilitas prior untuk masing-masing kelas target"""
     # value_counts(normalize=True) otomatis menghitung proporsi (jumlah kelas / total data)
@@ -7,7 +8,7 @@ def hitung_prior(df: pd.DataFrame, nama_kolom_target):
     return prior
 
 
-def hitung_likelihood(df, nama_kolom_fitur, nilai_fitur, nama_kolom_target, nilai_target):
+def hitung_likelihood(df, nama_kolom_fitur, nilai_fitur, nama_kolom_target, nilai_target, smooth_version = False) -> float:
     """Menghitung probabilitas Likelihood: P(Fitur | Target)"""
     # 1. Filter data hanya untuk kelas target tertentu (misal: hanya yang 'Disetujui')
     df_target = df[df[nama_kolom_target] == nilai_target]
@@ -18,13 +19,18 @@ def hitung_likelihood(df, nama_kolom_fitur, nilai_fitur, nama_kolom_target, nila
 
     # Mencegah pembagian dengan nol jika data tidak ditemukan
     if total_data_target == 0:
-        return 0
+        return 0.0
+
+    if smooth_version:
+        V = df[nama_kolom_fitur].nunique()
+        smooth_likelihood = (jumlah_fitur_di_target + 1) / (total_data_target + V)
+        return smooth_likelihood
 
     likelihood = jumlah_fitur_di_target / total_data_target
     return likelihood
 
 
-def prediksi_naive_bayes(df: pd.DataFrame, data_uji, nama_kolom_target):
+def prediksi_naive_bayes(df: pd.DataFrame, data_uji, nama_kolom_target, smooth_version = False):
     """Menghitung Posterior dan menentukan hasil prediksi"""
     prior = hitung_prior(df, nama_kolom_target)
     daftar_kelas = df[nama_kolom_target].unique()
@@ -40,7 +46,7 @@ def prediksi_naive_bayes(df: pd.DataFrame, data_uji, nama_kolom_target):
 
         # Kalikan dengan Likelihood dari setiap atribut yang ada di data uji
         for fitur, nilai in data_uji.items():
-            likelihood = hitung_likelihood(df, fitur, nilai, nama_kolom_target, kelas)
+            likelihood = hitung_likelihood(df, fitur, nilai, nama_kolom_target, kelas, smooth_version)
             prob_posterior *= likelihood  # Mengalikan nilai berantai
             hasil_likelihood[kelas][f"{fitur}->{nilai}"] = likelihood
 
